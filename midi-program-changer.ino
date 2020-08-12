@@ -1,139 +1,138 @@
-// MIDI Monitor for Teensy 3.2/Arduino Uno
+// MIDI Program Changer for Teensy 3.2/Arduino Uno
 
-#include "MidiMonitor.h"
+#include "midi-program-changer.h"
+
+// create buffer for lcd
+LcdBuffer lcdBuffer;
+
+// initialize static member of class MidiMessage
+uint8_t MidiMessage::runningStatus = 0;
+
+// create buffer for midi messages
+MidiMessageFIFOBuffer msgBuffer;
+
+// create filter for midi messages
+MidiMessageFilter msgFilter;
+
+// create translation for midi messages
+MidiMessageTranslation msgTranslation;
+
+// create translation map for midi messages
+MidiMessageTranslationMap msgTranslationMap;
+
+
 
 void setup() {
-  
-  HWSERIAL.begin( 31250 );
-  while ( !HWSERIAL ) delay( 1 ); // wait until the serial port has opened
 
-  initialiseLcd();
-  updateLcdPendingBuffer( "MIDI MONITOR ...", 0 );
-  updateLcdPendingBuffer( BOARD, 1 );
-  updateLcd();
+    HWSERIAL.begin( 31250 );
+    while ( !HWSERIAL ) delay( 1 ); // wait until the midi input serial port has opened
+
+    while ( !Serial ) delay( 1 ); // wait until the communication serial port has opened
+    
+    lcdBuffer.UpdateBuffer( 0, "PROGRAM CHANGER" );
+    lcdBuffer.UpdateLcdFromBuffer();
+
+    lcdBuffer.UpdateBuffer( 1, "================" );
+    lcdBuffer.UpdateLcdFromBuffer();
+
+    // Create filters on INPUT
+    msgFilter.SetChannelFilter( 2, FILTER_ON ); // no messages from channel 2
+    msgFilter.SetMessageTypeFilter( PITCH_BEND, FILTER_ON ); // no pitch bend
+    
+    // Report all filters
+    msgFilter.Report();
+
+    // Create translations on OUTPUT
+    // Type and channel
+    msgTranslation.SetMessageTypePair( NOTE_ON, KEY_PRESSURE );
+    msgTranslation.SetChannelPair( 1, 2 );
+    msgTranslationMap.InsertTranslation( msgTranslation );
+
+    // Data value
+    msgTranslation.SetMessageTypePair( CONTROL_CHANGE, CONTROL_CHANGE );
+    msgTranslation.SetChannelPair( 1, 1 );
+    msgTranslation.AddDataByte2MapPair( 7, 10 );
+    msgTranslationMap.InsertTranslation( msgTranslation );
+
+    // Multiple data values
+    msgTranslation.SetMessageTypePair( PROGRAM_CHANGE, PROGRAM_CHANGE );
+    msgTranslation.SetChannelPair( 1, 1 );
+    msgTranslation.AddDataByte2MapPair( 10, 11 );
+    msgTranslation.AddDataByte2MapPair( 15, 17 );
+    msgTranslation.AddDataByte2MapPair( 20, 23 );
+    msgTranslationMap.InsertTranslation( msgTranslation );
+
+    // Report all translations
+    msgTranslationMap.Report();
 
 }
 
+unsigned long previousMicros = 0;
+unsigned long refreshRate = 1000; // microseconds
 
 void loop() {
 
-  unsigned long currentMicros = micros();
+    // timer for refresh rate
+    unsigned long currentMicros = micros();
 
-  static uint8_t serialRunningStatus; // data bytes may be repeated without status bytes
-  static bool serialThirdByteFlag = false;
-  
-  // read a byte from serial and add to serial byte buffer
-  if ( HWSERIAL.available() > 0 ) {
-    uint8_t serialByte = HWSERIAL.read();
-    // Serial.print( String (serialByte, BIN ) );
-    HWSERIAL.write( serialByte );
-    previousMicros = currentMicros;
-    if ( serialByte & 0b10000000 ) { // Status byte received
-      serialRunningStatus = serialByte;
-      serialThirdByteFlag = false;
-      // Serial.println( " STATUS " );
-    } else {
-      if ( serialThirdByteFlag ) { // Second data byte received
-        serialThirdByteFlag = false;
-        serialByteBuffer.push( serialByte );
-        // Serial.println( " DATA 3 " );
-        return;
-      } else { // First data byte received
-        if ( !serialRunningStatus ) { // no status byte
-          return; // ignore invalid data byte
+    // if data waiting on serial, read a MIDI message, check message against filter and add to message buffer if not filtered 
+    if ( HWSERIAL.available() > 0 ) { // data waiting on midi input serial port
+        unsigned long startMicros = micros();
+        Serial.print( micros() );
+        MidiMessage serialMsg( READ_FROM_SERIAL );
+        Serial.print( " INPUT: " );
+        serialMsg.Report();
+        char lcdLine[ 17 ];
+        serialMsg.ReportLcdLine( lcdLine );
+        lcdBuffer.UpdateBuffer( 0, lcdLine );
+        // lcdBuffer.UpdateLcdFromBuffer();
+        if ( msgFilter.CheckMidiMessageForFilter( serialMsg ) == FILTER_OFF ) {
+            msgBuffer.Push( serialMsg );
+            // Serial.println( "PASSED" );
         } else {
-          // buffer greater than 0
-          if ( serialRunningStatus < 0xC0 ) { // First data byte of Note Off/On, Key Pressure or Control Change
-            serialThirdByteFlag = true;
-            serialByteBuffer.push( serialRunningStatus );
-            serialByteBuffer.push( serialByte );
-            // Serial.println( " DATA 2 " );
-            return;
-          }
-          if ( serialRunningStatus < 0xE0 ) { // First data byte of Program Change or Channel Pressure
-            serialByteBuffer.push( serialRunningStatus );
-            serialByteBuffer.push( serialByte );
-            // Serial.println( " DATA 2 " );
-            return;
-          }
-          if ( serialRunningStatus < 0xF0 ) { // First data byte of Pitch Bend
-            serialThirdByteFlag = true;
-            serialByteBuffer.push( serialRunningStatus );
-            serialByteBuffer.push( serialByte );
-            // Serial.println( " DATA 2 " );
-            return;
-          } else { // System message
-            serialRunningStatus = 0;
-            // Serial.println( " SYSTEM " );
-            return;
-          }
-        } // end running status buffer not empty 
-      } // end not third data byte
-    } // end not header byte
-  } // end serial available
+            // Serial.println( "FILTERED" );
+        }
+        unsigned long endMicros = micros();
+        Serial.println( endMicros - startMicros );
+    }
 
-  // read a byte from the serial byte buffer, 
-  // write byte to output 
-  // and report if whole MIDI message is received
-  if ( HWSERIAL.available() == 0 ) {
-    if ( serialByteBuffer.size() > 0 ) {
-      // Serial.print( "Buffer size  " );
-      // Serial.println( serialByteBuffer.size() );
-      if ( serialByteBuffer.size() >= ( FIFO_SIZE - 1) ) {
-        lcd.setCursor ( 0, 0 );
-        lcd.print( "BUFFER OVERFLOW!" );
-        exit( 0 );
-      }
-      if ( currentMicros - previousMicros >= refreshRate ) {
-        // Serial.print( "Refresh delay " );
-        // Serial.println( currentMicros - previousMicros );
-        previousMicros = currentMicros;
-        
-        static uint8_t bufferRunningStatus = 0;
-        static uint8_t bufferDataByte2 = DATA_UNSTORED;
-        static bool bufferThirdByteFlag = false;
-        
-        uint8_t bufferByte = serialByteBuffer.pop();
-        // Serial.write(bufferByte);
-        
-        if ( bufferByte & 0b10000000 ) { // Status byte received
-          bufferRunningStatus = bufferByte;
-          bufferThirdByteFlag = false;
-        } else {
-          if ( bufferThirdByteFlag ) { // Second data byte received
-            bufferThirdByteFlag = false;
-            reportMIDI( bufferRunningStatus, bufferDataByte2, bufferByte );
-            bufferDataByte2 = DATA_UNSTORED;
-            return;
-          } else { // First data byte received
-            if ( !bufferRunningStatus ) { // no status byte
-              return; // ignore invalid data byte
-            } else {
-              if ( bufferRunningStatus < 0xC0 ) { // Note Off/On, Key Pressure or Control Change
-                bufferThirdByteFlag = true;
-                bufferDataByte2 = bufferByte;
-                //
-                return;
-              }
-              if ( bufferRunningStatus < 0xE0 ) { // Program Change or Channel Pressure
-                reportMIDI( bufferRunningStatus, bufferByte, DATA_UNSTORED );
-                //
-                return;
-              }
-              if ( bufferRunningStatus < 0xF0 ) { // Pitch Bend
-                bufferThirdByteFlag = true;
-                bufferDataByte2 = bufferByte;
-                //
-                return;
-              } else { // System message
-                bufferRunningStatus = 0;
-                return;
-              }
-            } // end running status buffer not empty 
-          } // end not third data byte
-        } // end not header byte
-      } // end refresh rate reached
-    } // end buffer not empty
-  }
-  
+    // if no data waiting on serial, get MIDI message from the buffer, translate if 
+    // translation exists, then output to serial
+    if ( HWSERIAL.available() == 0 ) {
+        if ( msgBuffer.Count() > 0 ) {
+            unsigned long startMicros = micros();
+            Serial.print( micros() );
+            MidiMessage bufferMsg = msgBuffer.Pop();
+            if ( msgTranslationMap.TranslationExists( bufferMsg.GetStatusByte() ) ) {
+                msgTranslationMap.Translate( &bufferMsg );
+            }
+
+            Serial.print( " OUTPUT: " );
+            bufferMsg.Report();
+            char lcdLine[ 17 ];
+            bufferMsg.ReportLcdLine( lcdLine );
+            lcdBuffer.UpdateBuffer( 1, lcdLine );
+            // lcdBuffer.UpdateLcdFromBuffer();
+            // OUTPUT MIDI MESSAGE HERE
+            unsigned long endMicros = micros();
+            Serial.println( endMicros - startMicros );
+        }
+    }
+
+    // if no data waiting on serial and MIDI message buffer is empty, update the lcd if 
+    // the refresh timer limit has been reached
+    if ( HWSERIAL.available() == 0 && msgBuffer.Count() == 0 ) {
+        if ( currentMicros - previousMicros >= refreshRate ) {
+            // unsigned long startMicros = micros();
+            // Serial.print( micros() );
+            // Serial.print( " LCD UPDATE: Refresh: " );
+            // Serial.print( currentMicros - previousMicros );
+            previousMicros = currentMicros;
+            lcdBuffer.UpdateLcdFromBuffer();
+            // unsigned long endMicros = micros();
+            // Serial.print( " Update time: " );
+            // Serial.println( endMicros - startMicros );
+        }
+    }
+
 } // end loop
