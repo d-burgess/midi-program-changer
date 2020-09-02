@@ -43,46 +43,46 @@ std::pair < uint8_t, uint8_t > MidiMessageTranslation::GetChannelPair() {
 
 void MidiMessageTranslation::Report() {
     // translation source
-    Serial.print( "TRANSLATION: " );
-    Serial.print( GetStatusByte() );
-    Serial.print( " " );
-    Serial.print( GetMessageTypeString( messageTypePair.first ) );
-    Serial.print( ", Channel " );
-    Serial.print( channelPair.first );
+/*     // Serial.print( "TRANSLATION: " );
+    // Serial.print( GetStatusByte() );
+    // Serial.print( " " );
+    // Serial.print( GetMessageTypeString( messageTypePair.first ) );
+    // Serial.print( ", Channel " );
+    // Serial.print( channelPair.first );
     
-    Serial.print( " -> " );
+    // Serial.print( " -> " );
     
     // translation destination
-    Serial.print( GetMessageTypeString( messageTypePair.second ) );
-    Serial.print( ", Channel " );
-    Serial.println( channelPair.second );
+    // Serial.print( GetMessageTypeString( messageTypePair.second ) );
+    // Serial.print( ", Channel " );
+    // Serial.println( channelPair.second );
 
     // data byte translations
     if ( dataByte2Map.size() > 0 ) {
-        Serial.print( "    DataByte2: " );
+        // Serial.print( "    DataByte2: " );
         std::map < uint8_t, uint8_t >::iterator it = dataByte2Map.begin();
         while ( it != dataByte2Map.end() ) {
-            Serial.print( it->first );
-            Serial.print( " -> " );
-            Serial.println( it->second );
+            // Serial.print( it->first );
+            // Serial.print( " -> " );
+            // Serial.println( it->second );
             it++;
         }
     }
 
     if ( dataByte3Map.size() > 0 ) {
-        Serial.print( "    DataByte3: " );
+        // Serial.print( "    DataByte3: " );
         std::map < uint8_t, uint8_t >::iterator it = dataByte3Map.begin();
         while ( it != dataByte3Map.end() ) {
-            Serial.print( it->first );
-            Serial.print( " -> " );
-            Serial.println( it->second );
+            // Serial.print( it->first );
+            // Serial.print( " -> " );
+            // Serial.println( it->second );
             it++;
         }
-    }
+    } */
 };
 
-const String MidiMessageTranslation::GetMessageTypeString( uint8_t msgType ) {
-    String messageTypeString;
+const std::string MidiMessageTranslation::GetMessageTypeString( uint8_t msgType ) {
+    std::string messageTypeString;
     switch ( msgType ) {
         case NOTE_OFF:
             messageTypeString = "NOTE OFF";
@@ -128,7 +128,7 @@ const size_t MidiMessageTranslation::GetDataByte2MapSize() {
     return dataByte2Map.size();
 };
 
-std::pair < u_int8_t, u_int8_t > MidiMessageTranslation::GetDataByte2MapPairByValue( uint8_t v ) {
+std::pair < uint8_t, uint8_t > MidiMessageTranslation::GetDataByte2MapPairByValue( uint8_t v ) {
         if ( dataByte2Map.find( v ) != dataByte2Map.end() ) {
             std::map < uint8_t, uint8_t >::iterator it = dataByte2Map.find( v );
             return *it;
@@ -136,3 +136,29 @@ std::pair < u_int8_t, u_int8_t > MidiMessageTranslation::GetDataByte2MapPairByVa
             return std::make_pair( 0, 0 );
         }
 };
+
+
+
+
+
+void MidiMessageTranslation::AddDataByte3MapPair( uint8_t d3, uint8_t d3t ) {
+    dataByte3Map.insert( std::make_pair( d3, d3t ) );
+}
+
+std::map < uint8_t, uint8_t > MidiMessageTranslation::GetDataByte3() {
+    return dataByte3Map;
+}
+
+std::pair < uint8_t, uint8_t > MidiMessageTranslation::GetDataByte3MapPairByValue( uint8_t v ) {
+        if ( dataByte3Map.find( v ) != dataByte3Map.end() ) {
+            std::map < uint8_t, uint8_t >::iterator it = dataByte3Map.find( v );
+            return *it;
+        } else {
+            return std::make_pair( 0, 0 );
+        }
+}
+
+const size_t MidiMessageTranslation::GetDataByte3MapSize() {
+    return dataByte3Map.size();
+}
+

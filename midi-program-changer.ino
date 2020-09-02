@@ -3,7 +3,8 @@
 #include "midi-program-changer.h"
 
 // create buffer for lcd
-LcdBuffer lcdBuffer;
+LiquidCrystalFast lcd( 2, 8, 3, 4, 5, 6, 7 );
+LcdBuffer lcdBuffer( &lcd, 16, 2 );
 
 // initialize static member of class MidiMessage
 uint8_t MidiMessage::runningStatus = 0;
@@ -78,9 +79,9 @@ void loop() {
     // if data waiting on serial, read a MIDI message, check message against filter and add to message buffer if not filtered 
     if ( HWSERIAL.available() > 0 ) { // data waiting on midi input serial port
         unsigned long startMicros = micros();
-        Serial.print( micros() );
+        // Serial.print( micros() );
         MidiMessage serialMsg( READ_FROM_SERIAL );
-        Serial.print( " INPUT: " );
+        // Serial.print( " INPUT: " );
         serialMsg.Report();
         char lcdLine[ 17 ];
         serialMsg.ReportLcdLine( lcdLine );
@@ -93,7 +94,7 @@ void loop() {
             // Serial.println( "FILTERED" );
         }
         unsigned long endMicros = micros();
-        Serial.println( endMicros - startMicros );
+        // Serial.println( endMicros - startMicros );
     }
 
     // if no data waiting on serial, get MIDI message from the buffer, translate if 
@@ -101,13 +102,13 @@ void loop() {
     if ( HWSERIAL.available() == 0 ) {
         if ( msgBuffer.Count() > 0 ) {
             unsigned long startMicros = micros();
-            Serial.print( micros() );
+            // Serial.print( micros() );
             MidiMessage bufferMsg = msgBuffer.Pop();
             if ( msgTranslationMap.TranslationExists( bufferMsg.GetStatusByte() ) ) {
                 msgTranslationMap.Translate( &bufferMsg );
             }
 
-            Serial.print( " OUTPUT: " );
+            // Serial.print( " OUTPUT: " );
             bufferMsg.Report();
             char lcdLine[ 17 ];
             bufferMsg.ReportLcdLine( lcdLine );
@@ -115,7 +116,7 @@ void loop() {
             // lcdBuffer.UpdateLcdFromBuffer();
             // OUTPUT MIDI MESSAGE HERE
             unsigned long endMicros = micros();
-            Serial.println( endMicros - startMicros );
+            // Serial.println( endMicros - startMicros );
         }
     }
 
@@ -123,13 +124,13 @@ void loop() {
     // the refresh timer limit has been reached
     if ( HWSERIAL.available() == 0 && msgBuffer.Count() == 0 ) {
         if ( currentMicros - previousMicros >= refreshRate ) {
-            // unsigned long startMicros = micros();
+            unsigned long startMicros = micros();
             // Serial.print( micros() );
             // Serial.print( " LCD UPDATE: Refresh: " );
             // Serial.print( currentMicros - previousMicros );
             previousMicros = currentMicros;
             lcdBuffer.UpdateLcdFromBuffer();
-            // unsigned long endMicros = micros();
+            unsigned long endMicros = micros();
             // Serial.print( " Update time: " );
             // Serial.println( endMicros - startMicros );
         }

@@ -11,8 +11,6 @@ Midi Message Translation Map
 
 #include "MidiMessageTranslation.h"
 
-#include "Arduino.h"
-
 #include <map>
 
 class MidiMessageTranslationMap {

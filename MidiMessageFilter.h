@@ -9,7 +9,18 @@ Midi Message Filter
 
 #include "MidiMessage.h"
 
-#include "Arduino.h"
+#include "tinyxml2.h"
+#include <string>
+#include <cassert>
+
+#ifndef TEENSYDUINO
+    #include "fake/Serial.h"
+    extern Serial_ Serial;
+#else
+    #include "Arduino.h"
+#endif
+
+// #define NDEBUG
 
 #define FILTER_ON true
 #define FILTER_OFF false
@@ -18,7 +29,7 @@ class MidiMessageFilter {
     private:
         bool channelFilter[ 17 ]; // filter status for channel of midi message
         bool messageTypeFilter[ 17 ]; // filter status for message type of midi message
-        const String MessageTypeString( uint8_t messageType );
+        const std::string MessageTypeString( uint8_t messageType );
     public:
         MidiMessageFilter(); // empty constructor
         ~MidiMessageFilter();
@@ -28,6 +39,17 @@ class MidiMessageFilter {
         bool GetMessageTypeFilter( int8_t messageType );
         void Report();
         bool CheckMidiMessageForFilter( MidiMessage midiMessage );
+
+
+
+        std::string GetFilterAsXmlString(); 
+        void AddFilterXmlElement( const char * type, uint8_t i, tinyxml2::XMLNode * pChannelFilter, tinyxml2::XMLDocument * xmlDoc );
+        void AddFilterXmlNode( const char * filterName, const char * type, uint8_t startIndex, tinyxml2::XMLNode * pRoot, tinyxml2::XMLDocument * xmlDoc );
+        std::string GetXmlObjectAsStdString( tinyxml2::XMLDocument * xmlDoc );
+
+        uint8_t SetFilterFromXmlString( std::string xmlString );
+        tinyxml2::XMLError SetFilterFromXmlNode( tinyxml2::XMLNode * pFilter, const char * filterName, const char * attribute  );
+
 };
 
 #endif

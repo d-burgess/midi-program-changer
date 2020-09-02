@@ -9,8 +9,6 @@ Midi Message Translation
 
 #include "MidiMessage.h"
 
-#include "Arduino.h"
-
 #include <map>
 
 class MidiMessageTranslation {
@@ -31,13 +29,20 @@ class MidiMessageTranslation {
         void SetChannelPair( uint8_t c, uint8_t ct );
         std::pair < uint8_t, uint8_t > GetChannelPair();
         void Report();
-        const String GetMessageTypeString( uint8_t msgType );
+        const std::string GetMessageTypeString( uint8_t msgType );
         const char * GetMessageTypeChar( uint8_t msgType );
         uint8_t GetStatusByte();
         std::map < uint8_t, uint8_t > GetDataByte2();
         void AddDataByte2MapPair( uint8_t d2, uint8_t d2t );
         const size_t GetDataByte2MapSize();
-        std::pair < u_int8_t, u_int8_t > GetDataByte2MapPairByValue( uint8_t v );
+        std::pair < uint8_t, uint8_t > GetDataByte2MapPairByValue( uint8_t v );
+
+
+        std::map < uint8_t, uint8_t > GetDataByte3();
+        void AddDataByte3MapPair( uint8_t d3, uint8_t d3t );
+        const size_t GetDataByte3MapSize();
+        std::pair < uint8_t, uint8_t > GetDataByte3MapPairByValue( uint8_t v );
+
 };
 
 #endif

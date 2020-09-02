@@ -5,38 +5,30 @@ LCD Buffer
 */
 
 #include "LcdBuffer.h"
+#include <cstring>
+#include <stdio.h>
 
+#ifndef TEENSYDUINO
+    #include "fake/Serial.h"
+    extern Serial_ Serial;
+#else
+    #include "Arduino.h"
+#endif
 
-LcdBuffer::LcdBuffer( 
-    uint8_t width, 
-    uint8_t height,
-    uint8_t pinRS,
-    uint8_t pinRW,
-    uint8_t pinE,
-    uint8_t pinD4,
-    uint8_t pinD5,
-    uint8_t pinD6,
-    uint8_t pinD7
-    ) 
+LcdBuffer::LcdBuffer( LiquidCrystalFast * lcd, uint8_t width, uint8_t height ) 
     // constructor
     // member initializer list, defaults to 16x2 LCD
-    : columns { width }, 
+    : pLcd{ lcd },
+    columns { width }, 
     rows { height }, 
     buffer { new char*[ height ] }, 
-    display { new char*[ height ] },
-    lcd { new LiquidCrystalFast( pinRS, pinRW, pinE, pinD4, pinD5, pinD6, pinD7 ) }
-    //  LiquidCrystalFast myLcd(2, 8, 3, 4, 5, 6, 7); // Initialize the LCD
-    //                LCD pins: RS RW E  D4 D5 D6 D7     Uses 7 pins, RW not to GND
+    display { new char*[ height ] }
     {
-
-
-    // extern LiquidCrystalFast myLcd;
-    
     uint8_t i, j;
 
-    lcd->begin( columns, rows ); // tell the LCD that it is a 16x2 LCD
-    lcd->setCursor( 0, 0 );
-    lcd->clear();
+    pLcd->begin( columns, rows ); // tell the LCD that it is a 16x2 LCD
+    pLcd->setCursor( 0, 0 );
+    pLcd->clear();
 
     // create the buffer
     for ( i = 0; i < rows; i++ ) {
@@ -45,8 +37,8 @@ LcdBuffer::LcdBuffer(
     }
 
     // set the buffer and display to spaces and terminate strings
-    for ( i = 0; i < rows; i++ ) {
-        for ( j = 0; j < columns; j++ ) {
+    for ( i = 0; i < rows; ++i ) {
+        for ( j = 0; j < columns; ++j ) {
             buffer[ i ][ j ] = ' ';
             display[ i ][ j ] = ' ';
         }
@@ -102,14 +94,13 @@ void LcdBuffer::UpdateBuffer( const uint8_t row, const char * message, const uin
 }
 
 void LcdBuffer::ReportBufferContents() {
-    uint8_t i;
-    for ( i = 0; i < rows; i++ ) {
+    for ( uint8_t i = 0; i < rows; ++i ) {
         char * bufferRow = &buffer[ i ][ 0 ];
-        Serial.print( "Buffer contents row " );
-        Serial.print( i );
-        Serial.print( ": |" );
-        Serial.print( bufferRow );
-        Serial.println( "|" );
+        // Serial.print( "Buffer contents row " );
+        // Serial.print( i );
+        // Serial.print( ": |" );
+        // Serial.print( bufferRow );
+        // Serial.println( "|" );
     }
 
 }
@@ -118,11 +109,11 @@ void LcdBuffer::ReportDisplayContents() {
     uint8_t i;
     for ( i = 0; i < rows; i++ ) {
         char * displayRow = &display[ i ][ 0 ];
-        Serial.print( "Display contents row " );
-        Serial.print( i );
-        Serial.print( ": |" );
-        Serial.print( displayRow );
-        Serial.println( "|" );
+        // Serial.print( "Display contents row " );
+        // Serial.print( i );
+        // Serial.print( ": |" );
+        // Serial.print( displayRow );
+        // Serial.println( "|" );
     }
 
 }
@@ -145,8 +136,9 @@ void LcdBuffer::UpdateLcdFromBuffer() {
             // Serial.print( "|: " );
             if ( display[ i ][ j ] != buffer[ i ][ j ] ) {
                 // Serial.println( "NO MATCH, update" );
-                lcd->setCursor ( j, i );
-                lcd->print( buffer[ i ][ j ] );
+                pLcd->setCursor ( j, i );
+                char charToPrint = buffer[ i ][ j ];
+                pLcd->print( charToPrint );
             } else {
                 // Serial.println( "MATCHES, no update" );
             }
@@ -158,28 +150,24 @@ void LcdBuffer::UpdateLcdFromBuffer() {
 
 }
 
+std::string LcdBuffer::GetBufferContents()  {
+    std::string returnValue{ "" };
+    for ( uint8_t i = 0; i < rows; ++i ) {
+        char * bufferRow = &buffer[ i ][ 0 ];
+        returnValue.append( bufferRow );
+    }
 
-/* set the lcd pending buffer
-void updateLcdPendingBuffer( const char message[] = BLANK_ROW, uint8_t row = 0 ) {
+    return returnValue;
 
-  char output[ LCD_SIZE + 1 ];
+};
 
-  if ( strlen( message ) < LCD_SIZE ) {
-    // pad with spaces
-    sprintf( output, "%-16s", message ); // need LCD_SIZE here
-  } else if ( strlen( message ) > LCD_SIZE ) {
-    // limit to LCD_SIZE
-    memcpy( output, &message[0], LCD_SIZE );
-    output[ LCD_SIZE ] = '\0';
-  } else {
-    strcpy( output, message );
-  }
+std::string LcdBuffer::GetDisplayContents() {
+    std::string returnValue{ "" };
+    for ( uint8_t i = 0; i < rows; ++i ) {
+        char * displayRow = &display[ i ][ 0 ];
+        returnValue.append( displayRow );
+    }
 
-  // update buffer
-  if ( row == 1 ) {
-    strcpy( lcdPendingRow1Buffer, output );
-  } else {
-    strcpy( lcdPendingRow0Buffer, output );
-  }
-  
-} // end updateLcdPendingBuffer */
+    return returnValue;
+
+};

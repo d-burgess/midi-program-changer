@@ -7,11 +7,18 @@ LCD Buffer
 #ifndef __LcdBuffer__
 #define __LcdBuffer__
 
-#include "Arduino.h"
 
-#include "src/LiquidCrystalFast/LiquidCrystalFast.h" // Import the LCD Fast library
+#ifndef TEENSYDUINO
+    #include "fake/Serial.h"
+    #include "fake/LiquidCrystalFast.h"
+    extern Serial_ Serial;
+#else
+    #include "Arduino.h"
+    #include "src/LiquidCrystalFast/LiquidCrystalFast.h" // Import the LCD Fast library
+#endif
 
-// #include <memory>
+#include <stdint.h>
+#include <string>
 
 class LcdBuffer {
     private:
@@ -19,35 +26,26 @@ class LcdBuffer {
         const uint8_t rows; // height of the LCD
         char ** buffer;
         char ** display;
-        LiquidCrystalFast * lcd; // pointer to the lcd object
+        LiquidCrystalFast * pLcd; // pointer to the lcd object
 
     public:
-        LcdBuffer( 
-            uint8_t width = 16, 
-            uint8_t height = 2,
-            uint8_t pinRS = 2,
-            uint8_t pinRW = 8,
-            uint8_t pinE = 3,
-            uint8_t pinD4 = 4,
-            uint8_t pinD5 = 5,
-            uint8_t pinD6 = 6,
-            uint8_t pinD7 = 7
-        ); // constructor
-
+        explicit LcdBuffer( LiquidCrystalFast * lcd, uint8_t width = 16, uint8_t height = 2 ); // constructor
         ~LcdBuffer();
-
         void UpdateBuffer( 
             uint8_t row, 
             const char * message, 
             uint8_t column = 0, 
             uint8_t length = 16 
         );
-
         void ReportBufferContents();
-
         void ReportDisplayContents();
-
         void UpdateLcdFromBuffer();
+
+
+
+        std::string GetBufferContents();
+        std::string GetDisplayContents();
+
 };
 
 #endif

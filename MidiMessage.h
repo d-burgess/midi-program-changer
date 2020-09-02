@@ -7,7 +7,13 @@ Midi Message
 #ifndef __MidiMessage__
 #define __MidiMessage__
 
-#include "Arduino.h"
+#include <stdint.h>
+#include <string>
+#include <string.h>
+#include <math.h>
+#include <stdio.h>
+
+#include "HardwareSerial.h"
 
 #define NOTE_OFF 0x8
 #define NOTE_ON 0x9
@@ -36,11 +42,11 @@ class MidiMessage {
         const uint8_t GetStatusByte();
         void SetMessageType( uint8_t messageType );
         const uint8_t GetMessageType();
-        const String GetMessageTypeString();
+        const std::string GetMessageTypeString();
         void GetMessageTypeChar( char * reference );
-        const String GetDataByte2TypeString();
+        const std::string GetDataByte2TypeString();
         void GetDataByte2TypeChar( char * reference );
-        const String GetDataByte3TypeString();
+        const std::string GetDataByte3TypeString();
         void GetDataByte3TypeChar( char * reference );
         void SetChannel( uint8_t channel );
         const uint8_t GetChannel();
@@ -49,6 +55,12 @@ class MidiMessage {
         const uint8_t GetDataByte2();
         void SetDataByte2( uint8_t d2 );
         void GetNoteName( char * reference );
+
+
+
+        const uint8_t GetDataByte3();
+        void SetDataByte3( uint8_t d3 );
+
 };
 
 #endif

@@ -6,7 +6,12 @@ Midi Message
 
 #include "MidiMessage.h"
 
-#include "HardwareSerial.h"
+#ifndef TEENSYDUINO
+    #include "fake/Serial.h"
+    extern Serial_ Serial;
+#else
+    #include "Arduino.h"
+#endif
 
 MidiMessage::MidiMessage() {
     // constructor for empty midi message
@@ -30,7 +35,7 @@ MidiMessage::MidiMessage( bool readFromSerial ) {
             //     for ( int i = 7; i >= 0; --i ) {
             //         ( serialByte & ( 1 << i ) ) ? strcat( binary, "1" ) : strcat( binary, "0" );
             //     }
-            //     Serial.print( binary );
+            //     // Serial.print( binary );
             // }
             if ( serialByte & STATUS_BIT ) { // Status byte received
                 runningStatus = serialByte;
@@ -103,10 +108,10 @@ const uint8_t MidiMessage::GetStatusByte() {
     return statusByte;
 };
 
-const String MidiMessage::GetMessageTypeString() {
+const std::string MidiMessage::GetMessageTypeString() {
     // message type is top four bits
     uint8_t messageType = GetMessageType();
-    String messageTypeString;
+    std::string messageTypeString;
     switch ( messageType ) {
         case NOTE_OFF:
             messageTypeString = "NOTE OFF";
@@ -137,7 +142,7 @@ const String MidiMessage::GetMessageTypeString() {
 
 void MidiMessage::GetMessageTypeChar( char * reference ) {
     uint8_t messageType = GetMessageType();
-    String dataByte2Type;
+    std::string dataByte2Type;
     switch ( messageType ) {
         case NOTE_OFF:
             strcpy( reference, "NOf" );
@@ -184,10 +189,10 @@ const uint8_t MidiMessage::GetMessageType() {
     return messageType;
 }
 
-const String MidiMessage::GetDataByte2TypeString() {
+const std::string MidiMessage::GetDataByte2TypeString() {
    // message type is top four bits
     uint8_t messageType = GetMessageType();
-    String dataByte2Type;
+    std::string dataByte2Type;
     switch ( messageType ) {
         case NOTE_OFF:
             dataByte2Type = "PITCH";
@@ -245,10 +250,10 @@ void MidiMessage::GetDataByte2TypeChar( char * reference ) {
     };
 }
 
-const String MidiMessage::GetDataByte3TypeString() {
+const std::string MidiMessage::GetDataByte3TypeString() {
    // message type is top four bits
     uint8_t messageType = GetMessageType();
-    String dataByte3Type;
+    std::string dataByte3Type;
     switch ( messageType ) {
         case NOTE_OFF:
             dataByte3Type = "VELOCITY";
@@ -326,27 +331,27 @@ void MidiMessage::SetChannel( uint8_t channel ) {
 
 void MidiMessage::Report() {
     // message type
-    String m = GetMessageTypeString();
-    Serial.print( "Message Type: ");
-    Serial.print( m );
+    std::string m = GetMessageTypeString();
+    // Serial.print( "Message Type: ");
+    // Serial.print( m );
 
     // channel
-    Serial.print( ", Channel: ");
-    Serial.print( GetChannel() );
+    // Serial.print( ", Channel: ");
+    // Serial.print( GetChannel() );
 
     // data2
-    String d2 = GetDataByte2TypeString();
-    Serial.print( ", Data2: ");
-    Serial.print( d2 );
-    Serial.print( " " );
-    Serial.print( dataByte2 );
+    std::string d2 = GetDataByte2TypeString();
+    // Serial.print( ", Data2: ");
+    // Serial.print( d2 );
+    // Serial.print( " " );
+    // Serial.print( dataByte2 );
 
     // data3
-    String d3 = GetDataByte3TypeString();
-    Serial.print( ", Data3: ");
-    Serial.print( d3 );
-    Serial.print( " " );
-    Serial.println( dataByte3 );
+    std::string d3 = GetDataByte3TypeString();
+    // Serial.print( ", Data3: ");
+    // Serial.print( d3 );
+    // Serial.print( " " );
+    // Serial.println( dataByte3 );
 }
 
 void MidiMessage::ReportLcdLine( char * reference ) {
@@ -407,4 +412,13 @@ void MidiMessage::GetNoteName( char * reference ) {
     memcpy( &reference[ 2 ], &octave[ 0 ], 1 );
     reference[ 3 ] = '\0';
 
-};
+}
+
+const uint8_t MidiMessage::GetDataByte3() {
+    return dataByte3;
+}
+
+void MidiMessage::SetDataByte3( uint8_t d3 ) {
+    dataByte3 = d3;
+}
+
