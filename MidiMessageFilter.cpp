@@ -6,10 +6,6 @@ Midi Message Filter
 
 #include "MidiMessageFilter.h"
 
-#ifndef TEENSYDUINO
-    extern Serial_ Serial;
-#endif
-
 // PRIVATE
 
 MidiMessageFilter::MidiMessageFilter() {
@@ -85,18 +81,18 @@ bool MidiMessageFilter::GetMessageTypeFilter( int8_t messageType ) {
 void MidiMessageFilter::Report() {
     // channel filter status
     for ( uint8_t i = 1; i < 17; i++ ) {
-        // Serial.print( "Channel filter: Channel " );
-        // Serial.print( i );
-        // Serial.print( " Status " );
-        // Serial.println( ( channelFilter[ i ] ) ? "FILTER ON" : "FILTER OFF" );
+        Serial.print( "Channel filter: Channel " );
+        Serial.print( i );
+        Serial.print( " Status " );
+        Serial.println( ( channelFilter[ i ] ) ? "FILTER ON" : "FILTER OFF" );
     }
 
     // message type filter status
     for ( uint8_t i = NOTE_OFF; i <= SYSTEM_MESSAGE; i++ ) {
-        // Serial.print( "Message type filter: Message type " );
-        // Serial.print( MessageTypeString( i ) );
-        // Serial.print( " Status " );
-        // Serial.println( ( messageTypeFilter[ i ] ) ? "FILTER ON" : "FILTER OFF" );
+        Serial.print( "Message type filter: Message type " );
+        Serial.print( MessageTypeString( i ) );
+        Serial.print( " Status " );
+        Serial.println( ( messageTypeFilter[ i ] ) ? "FILTER ON" : "FILTER OFF" );
     }
 
 };

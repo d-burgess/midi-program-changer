@@ -1,13 +1,13 @@
 #ifndef __MidiProgramChanger__
 #define __MidiProgramChanger__
 
-    #if defined( TEENSYDUINO ) 
-        #include "Arduino.h"
-        #include "src/LiquidCrystalFast/LiquidCrystalFast.h"
-    #else
+    #ifdef UNIT_TESTING
         #include "fake/LiquidCrystalFast.h"
         #include "fake/Serial.h"
         #include "fake/Arduino.h"
+    #else
+        // #include "Arduino.h"
+        // #include "LiquidCrystalFast.h"
     #endif
 
     #include "HardwareSerial.h"
@@ -19,3 +19,4 @@
     #include "MidiMessageTranslationMap.h"
 
 #endif
+

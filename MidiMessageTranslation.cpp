@@ -43,39 +43,39 @@ std::pair < uint8_t, uint8_t > MidiMessageTranslation::GetChannelPair() {
 
 void MidiMessageTranslation::Report() {
     // translation source
-/*     // Serial.print( "TRANSLATION: " );
-    // Serial.print( GetStatusByte() );
-    // Serial.print( " " );
-    // Serial.print( GetMessageTypeString( messageTypePair.first ) );
-    // Serial.print( ", Channel " );
-    // Serial.print( channelPair.first );
+/*     Serial.print( "TRANSLATION: " );
+    Serial.print( GetStatusByte() );
+    Serial.print( " " );
+    Serial.print( GetMessageTypeString( messageTypePair.first ) );
+    Serial.print( ", Channel " );
+    Serial.print( channelPair.first );
     
-    // Serial.print( " -> " );
+    Serial.print( " -> " );
     
     // translation destination
-    // Serial.print( GetMessageTypeString( messageTypePair.second ) );
-    // Serial.print( ", Channel " );
-    // Serial.println( channelPair.second );
+    Serial.print( GetMessageTypeString( messageTypePair.second ) );
+    Serial.print( ", Channel " );
+    Serial.println( channelPair.second );
 
     // data byte translations
     if ( dataByte2Map.size() > 0 ) {
-        // Serial.print( "    DataByte2: " );
+        Serial.print( "    DataByte2: " );
         std::map < uint8_t, uint8_t >::iterator it = dataByte2Map.begin();
         while ( it != dataByte2Map.end() ) {
-            // Serial.print( it->first );
-            // Serial.print( " -> " );
-            // Serial.println( it->second );
+            Serial.print( it->first );
+            Serial.print( " -> " );
+            Serial.println( it->second );
             it++;
         }
     }
 
     if ( dataByte3Map.size() > 0 ) {
-        // Serial.print( "    DataByte3: " );
+        Serial.print( "    DataByte3: " );
         std::map < uint8_t, uint8_t >::iterator it = dataByte3Map.begin();
         while ( it != dataByte3Map.end() ) {
-            // Serial.print( it->first );
-            // Serial.print( " -> " );
-            // Serial.println( it->second );
+            Serial.print( it->first );
+            Serial.print( " -> " );
+            Serial.println( it->second );
             it++;
         }
     } */

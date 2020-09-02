@@ -5,7 +5,7 @@
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"    // for digitalRead, digitalWrite, pinMode, delayMicroseconds
 #else
-#include "WProgram.h"
+// #include "WProgram.h"
 #endif
 
 // commands

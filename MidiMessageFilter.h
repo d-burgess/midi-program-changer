@@ -13,11 +13,10 @@ Midi Message Filter
 #include <string>
 #include <cassert>
 
-#ifndef TEENSYDUINO
+#ifndef UNIT_TESTING
     #include "fake/Serial.h"
-    extern Serial_ Serial;
 #else
-    #include "Arduino.h"
+    // #include "Arduino.h"
 #endif
 
 // #define NDEBUG

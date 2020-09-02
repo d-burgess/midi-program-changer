@@ -6,12 +6,7 @@ Midi Message
 
 #include "MidiMessage.h"
 
-#ifndef TEENSYDUINO
-    #include "fake/Serial.h"
-    extern Serial_ Serial;
-#else
-    #include "Arduino.h"
-#endif
+// #include "HardwareSerial.h"
 
 MidiMessage::MidiMessage() {
     // constructor for empty midi message
@@ -35,7 +30,7 @@ MidiMessage::MidiMessage( bool readFromSerial ) {
             //     for ( int i = 7; i >= 0; --i ) {
             //         ( serialByte & ( 1 << i ) ) ? strcat( binary, "1" ) : strcat( binary, "0" );
             //     }
-            //     // Serial.print( binary );
+            //     Serial.print( binary );
             // }
             if ( serialByte & STATUS_BIT ) { // Status byte received
                 runningStatus = serialByte;
@@ -332,26 +327,26 @@ void MidiMessage::SetChannel( uint8_t channel ) {
 void MidiMessage::Report() {
     // message type
     std::string m = GetMessageTypeString();
-    // Serial.print( "Message Type: ");
-    // Serial.print( m );
+    Serial.print( "Message Type: ");
+    Serial.print( m );
 
     // channel
-    // Serial.print( ", Channel: ");
-    // Serial.print( GetChannel() );
+    Serial.print( ", Channel: ");
+    Serial.print( GetChannel() );
 
     // data2
     std::string d2 = GetDataByte2TypeString();
-    // Serial.print( ", Data2: ");
-    // Serial.print( d2 );
-    // Serial.print( " " );
-    // Serial.print( dataByte2 );
+    Serial.print( ", Data2: ");
+    Serial.print( d2 );
+    Serial.print( " " );
+    Serial.print( dataByte2 );
 
     // data3
     std::string d3 = GetDataByte3TypeString();
-    // Serial.print( ", Data3: ");
-    // Serial.print( d3 );
-    // Serial.print( " " );
-    // Serial.println( dataByte3 );
+    Serial.print( ", Data3: ");
+    Serial.print( d3 );
+    Serial.print( " " );
+    Serial.println( dataByte3 );
 }
 
 void MidiMessage::ReportLcdLine( char * reference ) {

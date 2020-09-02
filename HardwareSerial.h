@@ -14,7 +14,6 @@ Hardware Serial
   #define HWSERIAL Serial
 #else
   #include "fake/Serial.h"
-  extern Serial_ Serial;
   #define BOARD "UNIT_TESTING"
   #define HWSERIAL Serial
 #endif

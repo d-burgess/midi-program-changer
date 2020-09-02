@@ -8,13 +8,6 @@ LCD Buffer
 #include <cstring>
 #include <stdio.h>
 
-#ifndef TEENSYDUINO
-    #include "fake/Serial.h"
-    extern Serial_ Serial;
-#else
-    #include "Arduino.h"
-#endif
-
 LcdBuffer::LcdBuffer( LiquidCrystalFast * lcd, uint8_t width, uint8_t height ) 
     // constructor
     // member initializer list, defaults to 16x2 LCD
@@ -96,11 +89,11 @@ void LcdBuffer::UpdateBuffer( const uint8_t row, const char * message, const uin
 void LcdBuffer::ReportBufferContents() {
     for ( uint8_t i = 0; i < rows; ++i ) {
         char * bufferRow = &buffer[ i ][ 0 ];
-        // Serial.print( "Buffer contents row " );
-        // Serial.print( i );
-        // Serial.print( ": |" );
-        // Serial.print( bufferRow );
-        // Serial.println( "|" );
+        Serial.print( "Buffer contents row " );
+        Serial.print( i );
+        Serial.print( ": |" );
+        Serial.print( bufferRow );
+        Serial.println( "|" );
     }
 
 }
@@ -109,11 +102,11 @@ void LcdBuffer::ReportDisplayContents() {
     uint8_t i;
     for ( i = 0; i < rows; i++ ) {
         char * displayRow = &display[ i ][ 0 ];
-        // Serial.print( "Display contents row " );
-        // Serial.print( i );
-        // Serial.print( ": |" );
-        // Serial.print( displayRow );
-        // Serial.println( "|" );
+        Serial.print( "Display contents row " );
+        Serial.print( i );
+        Serial.print( ": |" );
+        Serial.print( displayRow );
+        Serial.println( "|" );
     }
 
 }

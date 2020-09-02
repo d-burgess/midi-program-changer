@@ -7,16 +7,17 @@ LCD Buffer
 #ifndef __LcdBuffer__
 #define __LcdBuffer__
 
-
-#ifndef TEENSYDUINO
-    #include "fake/Serial.h"
-    #include "fake/LiquidCrystalFast.h"
-    extern Serial_ Serial;
+#ifndef UNIT_TESTING  
+    // #include "Arduino.h"
+    // #include "src/LiquidCrystalFast/LiquidCrystalFast.h" // Import the LCD Fast library
 #else
-    #include "Arduino.h"
-    #include "src/LiquidCrystalFast/LiquidCrystalFast.h" // Import the LCD Fast library
+
+    #include "test-mpc/String.h"
+
 #endif
 
+#include "fake/LiquidCrystalFast.h"
+#include "fake/Serial.h"
 #include <stdint.h>
 #include <string>
 
