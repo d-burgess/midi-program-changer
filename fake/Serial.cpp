@@ -28,6 +28,18 @@ void Serial_::println( const char * c ) {
     std::cout<<c<<std::endl;
 }
 
+void Serial_::print( const char& c ) {
+    std::cout<<c<<std::endl;
+}
+
+void Serial_::print(const int i) {
+    std::cout<<i<<std::endl;
+}
+
+void Serial_::print(const size_t s)  {
+    std::cout<<s<<std::endl;
+}
+
 void Serial_::println( uint8_t i ) {
     std::cout<<unsigned(i)<<std::endl;
 }
@@ -44,4 +56,4 @@ uint8_t Serial_::read() {
     return 0;
 }
 
-
+extern Serial_ Serial;
