@@ -19,9 +19,6 @@ Click Button
 
 #ifndef TEENSYDUINO
     #include "fake/Arduino.h"
-    // #include "fake/HardwareSerial.h"
-    // #include "fake/String.h"
-    // extern Serial_ Serial;
 #else
     #include "Arduino.h"
 #endif
@@ -63,8 +60,7 @@ class ClickButton {
         ClickButton( uint8_t pin, uint8_t mode );
         ~ClickButton();
         const uint8_t getEvent();
-        const unsigned long getDoubleClickLimitMillis();
-        
+        const unsigned long getDoubleClickLimitMillis();  
 };
 
 #endif

@@ -1,0 +1,33 @@
+<MidiMessageTranslationMap>
+    <TranslationPair>
+        <StatusByte value="111"/>
+        <Translation>
+            <MessageTypePair first="1" second="2"/>
+            <ChannelPair first="3" second="4"/>
+            <DataByte2Map>
+                <DataByte2Pair first="5" second="6"/>
+                <DataByte2Pair first="7" second="8"/>
+            </DataByte2Map>
+            <DataByte3Map>
+                <DataByte3Pair first="9" second="10"/>
+                <DataByte3Pair first="11" second="12"/>
+            </DataByte3Map>
+        </Translation>
+    </TranslationPair>
+    <TranslationPair>
+        <StatusByte value="222"/>
+        <Translation>
+            <MessageTypePair first="13" second="14"/>
+            <ChannelPair first="15" second="16"/>
+            <DataByte2Map>
+                <DataByte2Pair first="17" second="18"/>
+                <DataByte2Pair first="19" second="20"/>
+            </DataByte2Map>
+            <DataByte3Map>
+                <DataByte3Pair first="21" second="22"/>
+                <DataByte3Pair first="23" second="24"/>
+                <DataByte3Pair first="25" second="26"/>
+            </DataByte3Map>
+        </Translation>
+    </TranslationPair>
+</MidiMessageTranslationMap>

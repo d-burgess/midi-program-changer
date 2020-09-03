@@ -9,10 +9,11 @@ Logger
 
 
 #ifndef TEENSYDUINO
-    // #include "fake/Serial.h"
-    #include "fake/HardwareSerial.h"
     #include "fake/LiquidCrystalFast.h"
-    // #include "fake/String.h"
+    #include "fake/HardwareSerial.h"
+    #include "fake/usb_serial_class.h"
+    #include "fake/Serial.h"
+    #include "fake/Arduino.h"
 #else
     #include "Arduino.h"
     #include "src/LiquidCrystalFast/LiquidCrystalFast.h" // Import the LCD Fast library
@@ -29,7 +30,7 @@ class Logger {
         void print( const char c );
         void print( const uint8_t i );
         void print( const bool b );
-        void print( const size_t i );
+        void print( const std::size_t i );
         void print( const int i );
         void println( const char * msg );
 

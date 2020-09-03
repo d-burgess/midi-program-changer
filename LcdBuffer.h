@@ -35,9 +35,9 @@ typedef uint8_t byte;
 #include "Logger.h"
 
 #include <stdint.h>
-#include <string>
+// #include <string>
 #include <cstring>
-#include <stdio.h>
+// #include <stdio.h>
 #include <vector>
 
 class LcdBuffer {
@@ -50,7 +50,7 @@ class LcdBuffer {
         Logger * pLog; // pointer to the log object
         void createCustomChars();
         void createBufferAndDisplay();
-        std::vector<std::vector<int>> pCustomCharBuffer;
+        std::vector<std::vector<uint8_t>> pCustomCharBuffer;
         void getByteAsString( char * ref, uint8_t aByte );
         void getSpacePaddedString( char * ref, uint8_t length, const char * msg );
         void fixedLengthString( char * ref, const char * msg, uint8_t length );

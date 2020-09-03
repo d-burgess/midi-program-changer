@@ -15,70 +15,51 @@ MidiMessage::MidiMessage() {
     dataByte3 = 0;
 }
 
-MidiMessage::MidiMessage( bool readFromSerial ) {
+MidiMessage::MidiMessage( HardwareSerial * pSerial ) {
     // constructor to get midi message from serial
     bool thirdByteFlag = false;
     bool messageComplete = false;
 
     do {
-        if ( HWSERIAL.available() > 0 ) { 
-            uint8_t serialByte = HWSERIAL.read(); // read a byte from serial
-            //  if ( serialByte != 0b11111110 ) { // active sensing
-            //     // output 8-digit binary number to serial
-            //     char binary[ 9 ];
-            //     binary[ 0 ] = '\0';
-            //     for ( int i = 7; i >= 0; --i ) {
-            //         ( serialByte & ( 1 << i ) ) ? strcat( binary, "1" ) : strcat( binary, "0" );
-            //     }
-            //     Serial.print( binary );
-            // }
+        if ( pSerial->available() > 0 ) { 
+            uint8_t serialByte = pSerial->read(); // read a byte from serial
+            if ( serialByte != 0b11111110 ) { // active sensing
+                // output 8-digit binary number to serial
+                // char binary[ 9 ];
+                // byteToBinaryString( binary, serialByte );
+                // Serial.print( binary );
+                // Serial.print( " (" );
+                // Serial.print( serialByte );
+                // Serial.println( ")" );
+            }
             if ( serialByte & STATUS_BIT ) { // Status byte received
                 runningStatus = serialByte;
                 thirdByteFlag = false;
-                // Serial.print( " Status byte " );
-                // Serial.print( GetMessageTypeString() );
-                // Serial.print( " running status now " );
-                // Serial.println( runningStatus );
             } else {
                 if ( thirdByteFlag ) { // Second data byte received
                     thirdByteFlag = false;
                     dataByte3 = serialByte;
-                    // Serial.println( " data byte 3 complete" );
                     messageComplete = true;
                 } else { // First data byte received
                     if ( !runningStatus ) { // no status byte
                         // ignore invalid data byte
-                        // Serial.println( " no running status - ignored " );
                     } else {
                         // running status is valid
                         if ( runningStatus < ( PROGRAM_CHANGE << 4 ) ) { // First data byte of Note Off/On, Key Pressure or Control Change
                             thirdByteFlag = true;
                             statusByte = runningStatus;
                             dataByte2 = serialByte;
-                            // Serial.print( " data byte 2 incomplete < PgC " );
-                            // Serial.print( runningStatus );
-                            // Serial.print( " < " );
-                            // Serial.println( PROGRAM_CHANGE << 4 );
                         } else if ( runningStatus < ( PITCH_BEND << 4 ) ) { // First data byte of Program Change or Channel Pressure
                             statusByte = runningStatus;
                             dataByte2 = serialByte;
                             dataByte3 = 0;
-                            // Serial.print( " data byte 2 complete < PtB " );
-                            // Serial.print( runningStatus );
-                            // Serial.print( " < " );
-                            // Serial.println( PITCH_BEND << 4 );
                             messageComplete = true;
                         } else if ( runningStatus < 0xF0 ) { // First data byte of Pitch Bend
                             thirdByteFlag = true;
                             statusByte = runningStatus;
                             dataByte2 = serialByte;
-                            // Serial.print( " data byte 2 incomplete < 0xF0 " );
-                            // Serial.print( runningStatus );
-                            // Serial.print( " < " );
-                            // Serial.println( 0xF0 );
                         } else { // System message, ignore
                             runningStatus = 0;
-                            // Serial.println( " System message - ignored" );
                         }
                     } // end running status not empty 
                 } // end not third data byte
@@ -103,65 +84,64 @@ const uint8_t MidiMessage::GetStatusByte() {
     return statusByte;
 };
 
-const std::string MidiMessage::GetMessageTypeString() {
+void MidiMessage::GetMessageTypeString( char * ref ) {
     // message type is top four bits
     uint8_t messageType = GetMessageType();
-    std::string messageTypeString;
+    ref[ 0 ] = '\0';
     switch ( messageType ) {
         case NOTE_OFF:
-            messageTypeString = "NOTE OFF";
+            strcpy( ref, "NOTE OFF" );
             break;
         case NOTE_ON:
-            messageTypeString = "NOTE ON";
+            strcpy( ref, "NOTE ON" );
             break;
         case KEY_PRESSURE:
-            messageTypeString = "KEY PRESSURE";
+            strcpy( ref, "KEY PRESSURE" );
             break;
         case CONTROL_CHANGE:
-            messageTypeString = "CONTROL CHANGE";
+            strcpy( ref, "CONTROL CHANGE" );
             break;
         case PROGRAM_CHANGE:
-            messageTypeString = "PROGRAM CHANGE";
+            strcpy( ref, "PROGRAM CHANGE" );
             break;
         case CHANNEL_PRESSURE:
-            messageTypeString = "CHANNEL PRESSURE";
+            strcpy( ref, "CHANNEL PRESSURE" );
             break;
         case PITCH_BEND:
-            messageTypeString = "PITCH BEND";
+            strcpy( ref, "PITCH BEND" );
             break;
         default:
-            messageTypeString = "UNKNOWN?";
+            strcpy( ref, "UNKNOWN?" );
     }
-    return messageTypeString;
 }
 
-void MidiMessage::GetMessageTypeChar( char * reference ) {
+void MidiMessage::GetMessageTypeChar( char * ref ) {
     uint8_t messageType = GetMessageType();
     std::string dataByte2Type;
     switch ( messageType ) {
         case NOTE_OFF:
-            strcpy( reference, "NOf" );
+            strcpy( ref, "NOf" );
             break;
         case NOTE_ON:
-            strcpy( reference, "NOn" );
+            strcpy( ref, "NOn" );
             break;
         case KEY_PRESSURE:
-            strcpy( reference, "KyP" );
+            strcpy( ref, "KyP" );
             break;
         case CONTROL_CHANGE:
-            strcpy( reference, "CtC" );
+            strcpy( ref, "CtC" );
             break;
         case PROGRAM_CHANGE:
-            strcpy( reference, "PgC" );
+            strcpy( ref, "PgC" );
             break;
         case CHANNEL_PRESSURE:
-            strcpy( reference, "ChP" );
+            strcpy( ref, "ChP" );
             break;
         case PITCH_BEND:
-            strcpy( reference, "PtB" );
+            strcpy( ref, "PtB" );
             break;
         default:
-            strcpy( reference, "Un?" );
+            strcpy( ref, "Un?" );
     };
 }
 
@@ -184,125 +164,123 @@ const uint8_t MidiMessage::GetMessageType() {
     return messageType;
 }
 
-const std::string MidiMessage::GetDataByte2TypeString() {
+void MidiMessage::GetDataByte2TypeString( char * ref ) {
    // message type is top four bits
     uint8_t messageType = GetMessageType();
-    std::string dataByte2Type;
+    ref[ 0 ] = '\0';
     switch ( messageType ) {
         case NOTE_OFF:
-            dataByte2Type = "PITCH";
+            strcpy( ref, "PITCH" );
             break;
         case NOTE_ON:
-            dataByte2Type = "PITCH";
+            strcpy( ref, "PITCH" );
             break;
         case KEY_PRESSURE:
-            dataByte2Type = "PITCH";
+            strcpy( ref, "PITCH" );
             break;
         case CONTROL_CHANGE:
-            dataByte2Type = "CONTROLLER NUMBER";
+            strcpy( ref, "CONTROLLER NUMBER" );
             break;
         case PROGRAM_CHANGE:
-            dataByte2Type = "PROGRAM";
+            strcpy( ref, "PROGRAM" );
             break;
         case CHANNEL_PRESSURE:
-            dataByte2Type = "PRESSURE";
+            strcpy( ref, "PRESSURE" );
             break;
         case PITCH_BEND:
-            dataByte2Type = "LEAST SIGNIFICANT BIT";
+            strcpy( ref, "LEAST SIGNIFICANT BIT" );
             break;
         default:
-            dataByte2Type = "UNKNOWN?";
+            strcpy( ref, "UNKNOWN?" );
     }
-    return dataByte2Type;
 }
 
-void MidiMessage::GetDataByte2TypeChar( char * reference ) {
+void MidiMessage::GetDataByte2TypeChar( char * ref ) {
     uint8_t messageType = GetMessageType();
     switch ( messageType ) {
         case NOTE_OFF:
-            strcpy( reference, "p" );
+            strcpy( ref, "p" );
             break;
         case NOTE_ON:
-            strcpy( reference, "p" );
+            strcpy( ref, "p" );
             break;
         case KEY_PRESSURE:
-            strcpy( reference, "p" );
+            strcpy( ref, "p" );
             break;
         case CONTROL_CHANGE:
-            strcpy( reference, "c" );
+            strcpy( ref, "c" );
             break;
         case PROGRAM_CHANGE:
-            strcpy( reference, "p" );
+            strcpy( ref, "p" );
             break;
         case CHANNEL_PRESSURE:
-            strcpy( reference, "p" );
+            strcpy( ref, "p" );
             break;
         case PITCH_BEND:
-            strcpy( reference, "l" );
+            strcpy( ref, "l" );
             break;
         default:
-            strcpy( reference, "?" );
+            strcpy( ref, "?" );
     };
 }
 
-const std::string MidiMessage::GetDataByte3TypeString() {
+void MidiMessage::GetDataByte3TypeString( char * ref ) {
    // message type is top four bits
     uint8_t messageType = GetMessageType();
-    std::string dataByte3Type;
+    ref[ 0 ] = '\0';
     switch ( messageType ) {
         case NOTE_OFF:
-            dataByte3Type = "VELOCITY";
+            strcpy( ref, "VELOCITY" );
             break;
         case NOTE_ON:
-            dataByte3Type = "VELOCITY";
+            strcpy( ref, "VELOCITY" );
             break;
         case KEY_PRESSURE:
-            dataByte3Type = "PRESSURE";
+            strcpy( ref, "PRESSURE" );
             break;
         case CONTROL_CHANGE:
-            dataByte3Type = "VALUE";
+            strcpy( ref, "VALUE" );
             break;
         case PROGRAM_CHANGE:
-            dataByte3Type = "(UNUSED)";
+            strcpy( ref, "(UNUSED)" );
             break;
         case CHANNEL_PRESSURE:
-            dataByte3Type = "(UNUSED)";
+            strcpy( ref, "(UNUSED)" );
             break;
         case PITCH_BEND:
-            dataByte3Type = "MOST SIGNIFICANT BIT";
+            strcpy( ref, "MOST SIGNIFICANT BIT" );
             break;
         default:
-            dataByte3Type = "UNKNOWN?";
+            strcpy( ref, "UNKNOWN?" );
     }
-    return dataByte3Type;
 }
 
-void MidiMessage::GetDataByte3TypeChar( char * reference ) {
+void MidiMessage::GetDataByte3TypeChar( char * ref ) {
     uint8_t messageType = GetMessageType();
     switch ( messageType ) {
         case NOTE_OFF:
-            strcpy( reference, "v" );
+            strcpy( ref, "v" );
             break;
         case NOTE_ON:
-            strcpy( reference, "v" );
+            strcpy( ref, "v" );
             break;
         case KEY_PRESSURE:
-            strcpy( reference, "p" );
+            strcpy( ref, "p" );
             break;
         case CONTROL_CHANGE:
-            strcpy( reference, "v" );
+            strcpy( ref, "v" );
             break;
         case PROGRAM_CHANGE:
-            strcpy( reference, " " );
+            strcpy( ref, " " );
             break;
         case CHANNEL_PRESSURE:
-            strcpy( reference, " " );
+            strcpy( ref, " " );
             break;
         case PITCH_BEND:
-            strcpy( reference, "m" );
+            strcpy( ref, "m" );
             break;
         default:
-            strcpy( reference, "?" );
+            strcpy( ref, "?" );
     };
 }
 
@@ -324,32 +302,34 @@ void MidiMessage::SetChannel( uint8_t channel ) {
     }
 }
 
-void MidiMessage::Report() {
+void MidiMessage::Report( Logger * logger ) {
     // message type
-    std::string m = GetMessageTypeString();
-    Serial.print( "Message Type: ");
-    Serial.print( m );
+    char buffer[ 23 ];
+    GetMessageTypeString( buffer );
+    logger->print( "Message Type: ");
+    logger->print( buffer );
 
     // channel
-    Serial.print( ", Channel: ");
-    Serial.print( GetChannel() );
+    logger->print( ", Channel: ");
+    logger->print( GetChannel() );
 
     // data2
-    std::string d2 = GetDataByte2TypeString();
-    Serial.print( ", Data2: ");
-    Serial.print( d2 );
-    Serial.print( " " );
-    Serial.print( dataByte2 );
+    GetDataByte2TypeString( buffer );
+    logger->print( ", Data2: ");
+    logger->print( buffer );
+    logger->print( " " );
+    logger->print( dataByte2 );
 
     // data3
-    std::string d3 = GetDataByte3TypeString();
-    Serial.print( ", Data3: ");
-    Serial.print( d3 );
-    Serial.print( " " );
-    Serial.println( dataByte3 );
+    GetDataByte3TypeString( buffer );
+    logger->print( ", Data3: ");
+    logger->print( buffer );
+    logger->print( " " );
+    logger->print( dataByte3 );
+    logger->println( "" );
 }
 
-void MidiMessage::ReportLcdLine( char * reference ) {
+void MidiMessage::ReportLcdLine( char * ref ) {
     // message type
     char m[4];
     GetMessageTypeChar( m );
@@ -361,7 +341,7 @@ void MidiMessage::ReportLcdLine( char * reference ) {
     if ( GetMessageType() == PROGRAM_CHANGE || GetMessageType() == CHANNEL_PRESSURE ) {
         // 2 byte messages
         // lcdLine
-        snprintf( reference, 17, "%s c%02d %s%03d", m, GetChannel(), d2, dataByte2 );
+        snprintf( ref, 17, "%s c%02d %s%03d", m, GetChannel(), d2, dataByte2 );
 
     } else {
         // data3
@@ -373,11 +353,11 @@ void MidiMessage::ReportLcdLine( char * reference ) {
             // lcdLine
             char noteName[ 4 ];
             GetNoteName( noteName );
-            snprintf( reference, 17, "%s c%02d %s%s%s%03d", m, GetChannel(), d2, noteName, d3, dataByte3 );
+            snprintf( ref, 17, "%s c%02d %s%s%s%03d", m, GetChannel(), d2, noteName, d3, dataByte3 );
         } else {
             //unpitched
             // lcdLine
-            snprintf( reference, 17, "%s c%02d %s%03d%s%03d", m, GetChannel(), d2, dataByte2, d3, dataByte3 );
+            snprintf( ref, 17, "%s c%02d %s%03d%s%03d", m, GetChannel(), d2, dataByte2, d3, dataByte3 );
         }
 
     }
@@ -391,7 +371,7 @@ void MidiMessage::SetDataByte2( uint8_t d2 ) {
     dataByte2 = d2;
 }
 
-void MidiMessage::GetNoteName( char * reference ) {
+void MidiMessage::GetNoteName( char * ref ) {
     // note names 2 chars each
     const char notes[ 25 ] = "C C#D D#E F F#G G#A A#B ";
 
@@ -401,11 +381,11 @@ void MidiMessage::GetNoteName( char * reference ) {
     octave[ 2 ] = '\0';
     snprintf( octave, 3, "%d", ( divisionResult.quot - 1 ) );
 
-    // copy note data to reference
-    memcpy( &reference[ 0 ], &notes[ ( divisionResult.rem ) * 2 ], 1 );
-    memcpy( &reference[ 1 ], &notes[ ( ( divisionResult.rem ) * 2 ) + 1 ], 1 );
-    memcpy( &reference[ 2 ], &octave[ 0 ], 1 );
-    reference[ 3 ] = '\0';
+    // copy note data to ref
+    memcpy( &ref[ 0 ], &notes[ ( divisionResult.rem ) * 2 ], 1 );
+    memcpy( &ref[ 1 ], &notes[ ( ( divisionResult.rem ) * 2 ) + 1 ], 1 );
+    memcpy( &ref[ 2 ], &octave[ 0 ], 1 );
+    ref[ 3 ] = '\0';
 
 }
 
@@ -415,5 +395,13 @@ const uint8_t MidiMessage::GetDataByte3() {
 
 void MidiMessage::SetDataByte3( uint8_t d3 ) {
     dataByte3 = d3;
+}
+
+void MidiMessage::byteToBinaryString(char * ref, uint8_t aByte) {
+    // represent byte as 8-digit binary number
+    ref[0] = '\0';
+    for ( int i = 7; i >= 0; --i ) {
+        ( aByte & ( 1 << i ) ) ? strcat( ref, "1" ) : strcat( ref, "0" );
+    }
 }
 

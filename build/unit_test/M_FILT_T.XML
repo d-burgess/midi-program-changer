@@ -1,0 +1,31 @@
+<MidiMessageFilter>
+    <ChannelFilter>
+        <Filter channel="1" status="false"/>
+        <Filter channel="2" status="false"/>
+        <Filter channel="3" status="true"/>
+        <Filter channel="4" status="false"/>
+        <Filter channel="5" status="false"/>
+        <Filter channel="6" status="true"/>
+        <Filter channel="7" status="false"/>
+        <Filter channel="8" status="false"/>
+        <Filter channel="9" status="true"/>
+        <Filter channel="10" status="false"/>
+        <Filter channel="11" status="false"/>
+        <Filter channel="12" status="true"/>
+        <Filter channel="13" status="false"/>
+        <Filter channel="14" status="false"/>
+        <Filter channel="15" status="true"/>
+        <Filter channel="16" status="false"/>
+    </ChannelFilter>
+    <MessageTypeFilter>
+        <Filter messageType="8" status="true"/>
+        <Filter messageType="9" status="false"/>
+        <Filter messageType="10" status="false"/>
+        <Filter messageType="11" status="false"/>
+        <Filter messageType="12" status="true"/>
+        <Filter messageType="13" status="false"/>
+        <Filter messageType="14" status="false"/>
+        <Filter messageType="15" status="false"/>
+        <Filter messageType="16" status="true"/>
+    </MessageTypeFilter>
+</MidiMessageFilter>

@@ -9,7 +9,9 @@ set( Sources
     ../fake/LiquidCrystalFast
     ../fake/Serial
     ../fake/Arduino
-    ../HardwareSerial
+    ../fake/HardwareSerial
+    ../fake/usb_serial_class
+    ../Logger
     ../LcdBuffer
     ../MidiMessage
     ../MidiMessageFIFOBuffer

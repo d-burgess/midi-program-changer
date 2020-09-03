@@ -11,12 +11,17 @@ Midi Message Filter
 
 #include "tinyxml2.h"
 #include <string>
-#include <cassert>
+// #include <cassert>
 
-#ifndef UNIT_TESTING
-    #include "fake/Serial.h"
-#else
+#if defined( TEENSYDUINO ) 
     // #include "Arduino.h"
+    #include "src/LiquidCrystalFast/LiquidCrystalFast.h"
+    // #include "usb_serial.h"
+#else
+    #include "fake/LiquidCrystalFast.h"
+    #include "fake/HardwareSerial.h"
+    #include "fake/Serial.h"
+    #include "fake/Arduino.h"
 #endif
 
 // #define NDEBUG
@@ -28,9 +33,10 @@ class MidiMessageFilter {
     private:
         bool channelFilter[ 17 ]; // filter status for channel of midi message
         bool messageTypeFilter[ 17 ]; // filter status for message type of midi message
-        const std::string MessageTypeString( uint8_t messageType );
+        void MessageTypeString( char * ref, uint8_t messageType );
+        Logger * pLogger;
     public:
-        MidiMessageFilter(); // empty constructor
+        MidiMessageFilter( Logger * pLogger ); // constructor
         ~MidiMessageFilter();
         void SetChannelFilter( int8_t channel, bool state );
         bool GetChannelFilter( int8_t channel );

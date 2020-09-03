@@ -3,19 +3,21 @@
 
 #include <stdint.h>
 #include <iostream>
+// #include <string>
+#include <cstddef>
 
-class usb_serial_class {
+class HardwareSerial {
     public:
-        usb_serial_class();
-        ~usb_serial_class();
+        explicit HardwareSerial();
+        ~HardwareSerial();
         bool initialised { false };
         explicit operator bool();
         virtual void print( const char * c );
         virtual void print( uint8_t i );
         virtual void print( time_t t );
-        virtual void print( const std::string s );
+        // virtual void print( const std::string s );
         virtual void print( const char& c );
-        virtual void print( const size_t s );
+        virtual void print( const std::size_t s );
         virtual void print( const int i );
         virtual void println( const char * c );
         virtual void println( uint8_t i );

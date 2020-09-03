@@ -9,12 +9,6 @@ Midi Message FIFO Buffer
 
 #include "MidiMessage.h"
 
-#ifndef UNIT_TESTING  
-    // #include "Arduino.h"
-#else
-    #include "test-mpc/String.h"
-#endif 
-
 #define BUFFER_SIZE 64
 
 class MidiMessageFIFOBuffer {

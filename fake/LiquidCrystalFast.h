@@ -5,8 +5,9 @@
 
 class LiquidCrystalFast {
     public:
-        LiquidCrystalFast( uint8_t pinRS, uint8_t pinRW, uint8_t pinE, uint8_t pinD4, uint8_t pinD5, uint8_t pinD6, uint8_t pinD7 );
-        virtual ~LiquidCrystalFast();
+        explicit LiquidCrystalFast();
+        explicit LiquidCrystalFast( int pinRS, int pinRW, int pinE, int pinD4, int pinD5, int pinD6, int pinD7 );
+        ~LiquidCrystalFast();
         bool initialised { false };
         virtual void begin( int c, int r );
         virtual void setCursor( int x, int y );
@@ -18,10 +19,7 @@ class LiquidCrystalFast {
         virtual void noBlink();
         virtual void noCursor();
         virtual void createChar( uint8_t c, uint8_t b[ 8 ] );
-        virtual void createChar( uint8_t c, uint8_t b[ 8 ] );
         virtual void write( uint8_t b );
-
-
 };
 
 #endif

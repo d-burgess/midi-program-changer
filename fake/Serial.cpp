@@ -17,27 +17,28 @@ void Serial_::print( uint8_t i ) {
 }
 
 void Serial_::print( time_t t ) {
-    std::cout<<t<<std::endl;
+    std::cout<<t;
 }
-
+/* 
 void Serial_::print( const std::string s ) {
     std::cout<<s<<std::endl;
 }
+*/
 
 void Serial_::println( const char * c ) {
     std::cout<<c<<std::endl;
 }
 
 void Serial_::print( const char& c ) {
-    std::cout<<c<<std::endl;
+    std::cout<<c;
 }
 
 void Serial_::print(const int i) {
-    std::cout<<i<<std::endl;
+    std::cout<<i;
 }
 
 void Serial_::print(const size_t s)  {
-    std::cout<<s<<std::endl;
+    std::cout<<s;
 }
 
 void Serial_::println( uint8_t i ) {
@@ -55,5 +56,3 @@ int Serial_::available() {
 uint8_t Serial_::read() {
     return 0;
 }
-
-extern Serial_ Serial;

@@ -13,7 +13,7 @@ Hardware Serial
   #define BOARD "Arduino Uno"
   #define HWSERIAL Serial
 #else
-  #include "fake/Serial.h"
+  // #include "fake/Serial.h"
   #define BOARD "UNIT_TESTING"
   #define HWSERIAL Serial
 #endif

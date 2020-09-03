@@ -277,7 +277,7 @@ void LcdBuffer::createCustomChars() {
     pLcd->createChar( LCD_CHAR_ARROW, arrow );
 
     // create array to keep track of custom char positions and values
-    pCustomCharBuffer = std::vector < std::vector <int> >( columns, std::vector <int> ( rows, LCD_CHAR_NO_CHAR ) );
+    pCustomCharBuffer = std::vector < std::vector <uint8_t> >( columns, std::vector <uint8_t> ( rows, LCD_CHAR_NO_CHAR ) );
 }
 
 void LcdBuffer::createBufferAndDisplay() {
